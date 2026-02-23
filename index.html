@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>CoC ディスプレイジェネレーター</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #050505; --text-color: #ffffff; --sub-text-color: #888888;
+            --accent-color: #C5373C; --border-color: rgba(255,255,255,0.1);
+            --img-shadow: drop-shadow(0 0 10px rgba(255,255,255,0.08)) drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+            --img-x: 0px; --img-y: 0px; --img-scale: 1;
+            --stat-max: 100;
+        }
+        body { background: #1a1a1a; color: #eee; margin: 0; display: flex; font-family: 'Montserrat', 'Noto Sans JP', sans-serif; height: 100vh; overflow: hidden; }
+        .sidebar { width: 420px; background: #222; padding: 20px; overflow-y: auto; border-right: 1px solid #444; flex-shrink: 0; }
+        .control-group { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333; }
+        h2 { font-size: 0.75rem; color: var(--accent-color); margin-bottom: 12px; letter-spacing: 0.05em; border-left: 4px solid var(--accent-color); padding-left: 10px; font-weight: 700; }
+        label { display: block; font-size: 0.65rem; margin-bottom: 2px; color: #aaa; font-weight: bold; }
+        textarea, input { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 6px 8px; border-radius: 4px; font-size: 0.8rem; box-sizing: border-box; font-family: inherit; margin-bottom: 6px; }
+        .grid-flex { display: flex; gap: 8px; flex-wrap: wrap; }
+        .grid-flex > div { flex: 1; min-width: 80px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .edition-btn { flex: 1; padding: 8px; cursor: pointer; border: 1px solid #444; background: #111; color: #888; font-size: 0.7rem; font-weight: bold; }
+        .edition-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+        .save-btn { width: 100%; padding: 18px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 900; font-size: 1rem; cursor: pointer; margin-top: 25px; transition: 0.3s; letter-spacing: 0.1em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        
+        .preview-area { flex: 1; display: flex; justify-content: center; align-items: center; background: #151515; padding: 20px; overflow: auto; }
+        #display-canvas { width: 800px; height: 800px; background: var(--bg-color); color: var(--text-color); display: flex; position: relative; overflow: hidden; flex-shrink: 0; }
+        
+        .info-side { flex: 0 0 55%; padding: 50px 45px; display: flex; flex-direction: column; z-index: 10; }
+        .scenario-tag { align-self: flex-start; background: var(--accent-color); color: #fff; font-size: 0.7rem; font-weight: 900; padding: 4px 12px; margin-bottom: 12px; height: 1.2rem; display: flex; align-items: center; }
+
+        .name-area { border-left: 10px solid var(--accent-color); padding-left: 20px; display: flex; flex-direction: column; justify-content: center; width: 100%; box-sizing: border-box; flex-shrink: 0; min-height: 110px; margin-bottom: 5px; }
+        ruby { display: flex; flex-direction: column-reverse; width: 100%; align-items: flex-start; }
+        rt { font-size: 0.85rem; letter-spacing: 0.3em; color: var(--accent-color); margin-bottom: 2px; font-weight: 700; text-transform: uppercase; text-align: left; line-height: 1.2; }
+        #d-name-main { font-size: 3.8rem; font-weight: 900; line-height: 1; white-space: nowrap; display: inline-block; transform-origin: left center; }
+        .profile-sub { font-size: 0.85rem; color: var(--sub-text-color); margin: 8px 0 0 0; line-height: 1; }
+
+        .traits-display { font-size: 0.75rem; font-weight: 700; color: var(--accent-color); margin: 5px 0 0 20px; min-height: 1.2em; opacity: 0.9; }
+
+        .variants-row { display: flex; gap: 10px; margin: 15px 0 20px 0; flex-shrink: 0; height: 105px; }
+        .v-slot { width: 105px; height: 105px; background: rgba(128,128,128,0.05); border: 1px solid var(--border-color); overflow: hidden; }
+        .v-slot img { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 25px; margin-bottom: 25px; flex-shrink: 0; }
+        .stat-val-header { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; }
+        .stat-bar-bg { height: 2px; background: var(--border-color); }
+        .stat-bar-fill { height: 100%; background: var(--accent-color); transition: 0.6s ease-out; width: 0%; }
+
+        .sub-stats { display: flex; gap: 10px; margin-bottom: 25px; flex-shrink: 0; }
+        .sub-badge { flex: 1; padding: 10px 2px; background: rgba(128,128,128,0.05); border-left: 3px solid var(--accent-color); text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .sub-label { font-size: 0.6rem; color: var(--sub-text-color); font-weight: 700; display: block; margin-bottom: 2px; line-height: 1; }
+        .sub-val { font-size: 1.3rem; font-weight: 900; line-height: 1; }
+
+        .skills-container { border-top: 1px solid var(--border-color); padding-top: 15px; flex-grow: 1; overflow: hidden; }
+        #skills-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px 15px; }
+        .skill-item { font-size: 0.65rem; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
+        .skill-val { color: var(--accent-color); font-weight: 700; }
+        
+        .image-side { flex: 1; position: relative; display: flex; justify-content: center; align-items: flex-end; }
+        .accent-bg { position: absolute; top: 0; right: 0; width: 75%; height: 100%; background: linear-gradient(135deg, transparent, var(--accent-color)); opacity: 0.08; clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%); }
+        #main-img { height: 98%; z-index: 5; transform: translate(var(--img-x), var(--img-y)) scale(var(--img-scale)); filter: var(--img-shadow); display: none; pointer-events: none; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="control-group">
+        <h2>1. データ取り込み</h2>
+        <textarea id="json-input" placeholder="駒データを貼り付け"></textarea>
+        <div class="grid-2">
+            <button id="btn-7th" class="edition-btn active" onclick="setEdition(7)">7版</button>
+            <button id="btn-6th" class="edition-btn" onclick="setEdition(6)">6版</button>
+        </div>
+    </div>
+    <div class="control-group">
+        <h2>2. プロフィール & 特徴表</h2>
+        <div class="grid-2">
+            <div><label>名前</label><input type="text" id="in-name" oninput="splitNameRuby(this.value)"></div>
+            <div><label>フリガナ</label><input type="text" id="in-ruby" oninput="refreshProfileDisplay()"></div>
+        </div>
+        <div class="grid-flex">
+            <div style="flex: 2;"><label>シナリオ</label><input type="text" id="in-scenario" oninput="refreshScenarioDisplay()"></div>
+            <div><label>性別</label><input type="text" id="in-sex" oninput="refreshProfileDisplay()"></div>
+            <div><label>年齢</label><input type="text" id="in-age" oninput="refreshProfileDisplay()"></div>
+        </div>
+        <label>職業</label><input type="text" id="in-job" oninput="refreshProfileDisplay()">
+        <div class="grid-2" style="margin-top:5px;">
+            <div><label>特徴1</label><input type="text" id="in-t1-name" oninput="updateTrait()"></div>
+            <div><label>特徴2</label><input type="text" id="in-t2-name" oninput="updateTrait()"></div>
+        </div>
+    </div>
+    <div class="control-group">
+        <h2>3. ステータス & 技能</h2>
+        <div class="grid-flex">
+            <div><label>STR</label><input type="number" id="in-str" oninput="setBar('str', this.value)"></div>
+            <div><label>CON</label><input type="number" id="in-con" oninput="setBar('con', this.value)"></div>
+            <div><label>POW</label><input type="number" id="in-pow" oninput="setBar('pow', this.value)"></div>
+            <div><label>DEX</label><input type="number" id="in-dex" oninput="setBar('dex', this.value)"></div>
+        </div>
+        <div class="grid-flex">
+            <div><label>APP</label><input type="number" id="in-app" oninput="setBar('app', this.value)"></div>
+            <div><label>SIZ</label><input type="number" id="in-siz" oninput="setBar('siz', this.value)"></div>
+            <div><label>INT</label><input type="number" id="in-int" oninput="setBar('int', this.value)"></div>
+            <div><label>EDU</label><input type="number" id="in-edu" oninput="setBar('edu', this.value)"></div>
+        </div>
+        <div class="grid-flex" style="margin-top: 10px;">
+            <div><label>SAN</label><input type="number" id="in-san" oninput="update('d-san', this.value, '0')"></div>
+            <div><label>幸運</label><input type="number" id="in-luk" oninput="update('d-luk', this.value, '0')"></div>
+            <div><label>HP</label><input type="number" id="in-hp" oninput="update('d-hp', this.value, '0')"></div>
+            <div><label>MP</label><input type="number" id="in-mp" oninput="update('d-mp', this.value, '0')"></div>
+        </div>
+        <label style="margin-top:10px;">技能一覧</label>
+        <textarea id="in-skills" oninput="refreshSkills()" style="min-height:100px;"></textarea>
+    </div>
+    <div class="control-group">
+        <h2>4. デザイン & 差分</h2>
+        <label>立ち絵</label><input type="file" onchange="loadImg(this, 'main-img')">
+        <div class="grid-3">
+            <div><label>左右</label><input type="range" id="r-x" min="-600" max="600" value="0" oninput="setPos('--img-x', this.value)"></div>
+            <div><label>上下</label><input type="range" id="r-y" min="-600" max="600" value="0" oninput="setPos('--img-y', this.value)"></div>
+            <div><label>拡大</label><input type="range" id="r-s" min="0.1" max="4" step="0.01" value="1" oninput="setPos('--img-scale', this.value)"></div>
+        </div>
+        <label style="margin-top:10px;">差分（3枚）</label>
+        <div class="grid-3">
+            <input type="file" onchange="loadImg(this, 'v1-img')">
+            <input type="file" onchange="loadImg(this, 'v2-img')">
+            <input type="file" onchange="loadImg(this, 'v3-img')">
+        </div>
+        <div class="grid-2" style="margin-top: 15px;">
+            <button onclick="applyTheme('dark')" style="cursor:pointer; padding:8px; background:#111; color:#fff; border:1px solid #444;">ダーク</button>
+            <button onclick="applyTheme('light')" style="cursor:pointer; padding:8px; background:#eee; color:#111; border:1px solid #ccc;">ライト</button>
+        </div>
+        <input type="color" id="color-picker" value="#C5373C" style="margin-top:8px; height:30px; border:none; width:100%;">
+        <button class="save-btn" onclick="saveImage()">画像保存</button>
+    </div>
+</div>
+
+<div class="preview-area">
+    <div id="display-canvas">
+        <div class="info-side">
+            <div id="d-scenario" class="scenario-tag">CoC 7th: Scenario</div>
+            <div class="name-area">
+                <ruby><span id="d-name-main">NAME</span><rt id="d-name-ruby">INVESTIGATOR</rt></ruby>
+                <div id="d-profile-line" class="profile-sub">- / -</div>
+            </div>
+            <div id="d-traits" class="traits-display"></div>
+
+            <div class="variants-row">
+                <div class="v-slot"><img id="v1-img"></div>
+                <div class="v-slot"><img id="v2-img"></div>
+                <div class="v-slot"><img id="v3-img"></div>
+            </div>
+            <div class="status-grid">
+                <div class="stat-item"><div class="stat-val-header">STR <span id="val-str">0</span></div><div class="stat-bar-bg"><div id="b-str" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header">CON <span id="val-con">0</span></div><div class="stat-bar-bg"><div id="b-con" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header">POW <span id="val-pow">0</span></div><div class="stat-bar-bg"><div id="b-pow" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header">DEX <span id="val-dex">0</span></div><div class="stat-bar-bg"><div id="b-dex" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header">APP <span id="val-app">0</span></div><div class="stat-bar-bg"><div id="b-app" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header">SIZ <span id="val-siz">0</span></div><div class="stat-bar-bg"><div id="b-siz" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header">INT <span id="val-int">0</span></div><div class="stat-bar-bg"><div id="b-int" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header">EDU <span id="val-edu">0</span></div><div class="stat-bar-bg"><div id="b-edu" class="stat-bar-fill"></div></div></div>
+            </div>
+            <div class="sub-stats">
+                <div class="sub-badge"><span class="sub-label">SAN</span><span class="sub-val" id="d-san">0</span></div>
+                <div class="sub-badge"><span class="sub-label">幸運</span><span class="sub-val" id="d-luk">0</span></div>
+                <div class="sub-badge"><span class="sub-label">HP</span><span class="sub-val" id="d-hp">0</span></div>
+                <div class="sub-badge"><span class="sub-label">MP</span><span class="sub-val" id="d-mp">0</span></div>
+            </div>
+            <div class="skills-container">
+                <div style="font-size: 0.7rem; font-weight: 900; color: var(--accent-color); margin-bottom: 8px; letter-spacing: 0.2em;">SKILLS</div>
+                <div id="skills-list"></div>
+            </div>
+        </div>
+        <div class="image-side"><div class="accent-bg"></div><img id="main-img"></div>
+    </div>
+</div>
+
+<script>
+    const root = document.documentElement;
+    document.getElementById('json-input').oninput = importData;
+    document.getElementById('color-picker').oninput = (e) => root.style.setProperty('--accent-color', e.target.value);
+
+    function updateTrait() {
+        const t1 = document.getElementById('in-t1-name').value.trim();
+        const t2 = document.getElementById('in-t2-name').value.trim();
+        const display = document.getElementById('d-traits');
+        if (t1 && t2) display.innerText = `${t1} / ${t2}`;
+        else if (t1 || t2) display.innerText = t1 || t2;
+        else display.innerText = "";
+    }
+
+    function adjustNameFontSize() {
+        const nameEl = document.getElementById('d-name-main');
+        const container = document.querySelector('.name-area');
+        const maxWidth = container.clientWidth - 45; 
+        let fontSize = 3.8; 
+        nameEl.style.fontSize = fontSize + "rem";
+        while (nameEl.offsetWidth > maxWidth && fontSize > 1.0) {
+            fontSize -= 0.1;
+            nameEl.style.fontSize = fontSize + "rem";
+        }
+    }
+
+    function refreshProfileDisplay() {
+        const rubyVal = document.getElementById('in-ruby').value.trim();
+        document.getElementById('d-name-ruby').innerText = rubyVal || "INVESTIGATOR";
+        const sex = document.getElementById('in-sex').value.trim() || "-";
+        const age = document.getElementById('in-age').value.trim() || "-";
+        const job = document.getElementById('in-job').value.trim();
+        let profileLine = `${sex} / ${age}`;
+        if (job) profileLine += ` / ${job}`;
+        document.getElementById('d-profile-line').innerText = profileLine;
+        adjustNameFontSize();
+    }
+
+    function refreshScenarioDisplay() {
+        const scInput = document.getElementById('in-scenario');
+        const activeEd = document.getElementById('btn-7th').classList.contains('active') ? 7 : 6;
+        const prefix = `CoC ${activeEd}th: `;
+        const scenarioName = scInput.value.trim() || "Scenario";
+        update('d-scenario', prefix + scenarioName);
+    }
+
+    function splitNameRuby(fullVal) {
+        const nameInput = document.getElementById('in-name');
+        const rubyInput = document.getElementById('in-ruby');
+        const match = fullVal.match(/^(.+?)\s*[（(](.+?)[）)]$/);
+        if (match) { nameInput.value = match[1].trim(); rubyInput.value = match[2].trim(); }
+        else { nameInput.value = fullVal; rubyInput.value = ""; }
+        update('d-name-main', nameInput.value || 'NAME');
+        refreshProfileDisplay();
+    }
+
+    function importData() {
+        const raw = document.getElementById('json-input').value;
+        if (!raw) return;
+        try {
+            const json = JSON.parse(raw);
+            const d = json.data || {};
+            const targetParams = ["str","con","pow","dex","app","siz","int","edu"];
+            
+            if (d.params) {
+                d.params.forEach(p => {
+                    const label = p.label.replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).toLowerCase();
+                    if(targetParams.includes(label)) {
+                        const input = document.getElementById('in-' + label);
+                        if(input) { input.value = p.value; setBar(label, p.value); }
+                    }
+                });
+            }
+            if (d.status) {
+                d.status.forEach(s => {
+                    const label = s.label.replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).toLowerCase();
+                    const map = {'hp':'hp', 'mp':'mp', 'san':'san', '幸運':'luk', 'こううん':'luk'};
+                    const id = map[label] || map[s.label];
+                    if(id) { document.getElementById('in-' + id).value = s.value; update('d-' + id, s.value); }
+                });
+            }
+
+            let extractedSkills = [];
+            if (d.skills) {
+                extractedSkills = d.skills.map(s => `${s.label} ${s.value}`);
+            } 
+            
+            // チャットパレット(commands)からの抽出ロジック強化
+            if (d.commands) {
+                const lines = d.commands.split('\n');
+                lines.forEach(line => {
+                    // nCCB<=75 【幸運】 のような形式に対応
+                    const match = line.match(/[a-zA-Z]*CCB?\(?.*\)?<?=(\d+)\s+【(.+?)】/);
+                    if (match) {
+                        const sVal = match[1];
+                        const sLabel = match[2].trim();
+                        
+                        // 幸運・SAN・HP・MPがチャパレにある場合、ステータス欄を上書き
+                        const statusMap = {'幸運':'luk','SAN':'san','HP':'hp','MP':'mp','正気度':'san','正気度ロール':'san'};
+                        if(statusMap[sLabel]) {
+                            const inputId = 'in-' + statusMap[sLabel];
+                            const displayId = 'd-' + statusMap[sLabel];
+                            document.getElementById(inputId).value = sVal;
+                            update(displayId, sVal);
+                        } else {
+                            // それ以外は技能リストへ
+                            extractedSkills.push(`${sLabel} ${sVal}`);
+                        }
+                    }
+                });
+            }
+            
+            if (extractedSkills.length > 0) {
+                const inSkills = document.getElementById('in-skills');
+                inSkills.value = extractedSkills.join('\n');
+                refreshSkills();
+            }
+
+            if (d.name) splitNameRuby(d.name);
+            if (d.color) { root.style.setProperty('--accent-color', d.color); document.getElementById('color-picker').value = d.color; }
+            refreshProfileDisplay();
+        } catch (e) { console.error(e); }
+    }
+
+    function setEdition(ed) {
+        root.style.setProperty('--stat-max', ed === 7 ? 100 : 25);
+        document.getElementById('btn-7th').classList.toggle('active', ed === 7);
+        document.getElementById('btn-6th').classList.toggle('active', ed === 6);
+        refreshScenarioDisplay();
+        ["str","con","pow","dex","app","siz","int","edu"].forEach(id => {
+            const input = document.getElementById('in-' + id);
+            if(input) setBar(id, input.value);
+        });
+    }
+    
+    function update(id, val, def) { const el = document.getElementById(id); if(el) el.innerText = val || def; }
+    
+    function setBar(id, val) { 
+        const max = parseInt(getComputedStyle(root).getPropertyValue('--stat-max'));
+        const bar = document.getElementById('b-' + id); if(bar) bar.style.width = Math.min(Math.max((val / max) * 100, 0), 100) + '%';
+        const label = document.getElementById('val-' + id); if(label) label.innerText = val;
+    }
+
+    function refreshSkills() {
+        const text = document.getElementById('in-skills').value;
+        const list = document.getElementById('skills-list'); list.innerHTML = "";
+        text.split('\n').forEach(line => {
+            const match = line.match(/(.+?)\s*[:\s=]\s*(\d+)/) || line.match(/(.+?)\s+(\d+)/);
+            if (match) {
+                const item = document.createElement('div'); item.className = 'skill-item';
+                item.innerHTML = `${match[1].trim()}<span class="skill-val">${match[2]}</span>`;
+                list.appendChild(item);
+            }
+        });
+    }
+
+    function setPos(p, v) { 
+        if(p === '--img-scale') root.style.setProperty(p, v);
+        else root.style.setProperty(p, v + 'px'); 
+    }
+
+    function loadImg(input, targetId) {
+        const file = input.files[0];
+        if (file) {
+            const target = document.getElementById(targetId);
+            target.src = URL.createObjectURL(file); target.style.display = 'block';
+        }
+    }
+
+    function applyTheme(type) {
+        if(type === 'dark') {
+            root.style.setProperty('--bg-color', '#050505'); root.style.setProperty('--text-color', '#ffffff');
+            root.style.setProperty('--sub-text-color', '#888888'); root.style.setProperty('--border-color', 'rgba(255,255,255,0.1)');
+            root.style.setProperty('--img-shadow', 'drop-shadow(0 0 10px rgba(255,255,255,0.08)) drop-shadow(0 20px 40px rgba(0,0,0,0.6))');
+        } else {
+            root.style.setProperty('--bg-color', '#ffffff'); root.style.setProperty('--text-color', '#111111');
+            root.style.setProperty('--sub-text-color', '#666666'); root.style.setProperty('--border-color', 'rgba(0,0,0,0.1)');
+            root.style.setProperty('--img-shadow', 'drop-shadow(0 10px 20px rgba(0,0,0,0.15))');
+        }
+    }
+
+    function saveImage() {
+        const target = document.getElementById('display-canvas');
+        html2canvas(target, { scale: 2, useCORS: true }).then(canvas => {
+            const link = document.createElement('a'); link.download = `character_sheet.png`;
+            link.href = canvas.toDataURL(); link.click();
+        });
+    }
+
+    setEdition(7);
+</script>
+</body>
+</html>

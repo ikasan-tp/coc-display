@@ -53,9 +53,46 @@
             object-fit: contain; display: none; 
         }
 
-        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 25px; margin-bottom: 25px; flex-shrink: 0; }
-        .stat-val-header { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; }
-        .stat-bar-bg { height: 2px; background: var(--border-color); }
+        /* --- ステータス：縦ライン完全整列版 --- */
+        .status-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px 40px; 
+            margin-bottom: 25px; 
+            flex-shrink: 0; 
+        }
+        .stat-item { width: 100%; }
+
+.stat-val-header { 
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;   /* baseline → center */
+    font-size: 0.75rem; 
+    font-weight: 900; 
+    margin-bottom: 4px;
+    height: 16px;          /* 行高さ固定で安定 */
+}
+
+.stat-label { 
+    display: inline-block;
+    width: 45px; 
+    text-align: left;
+    color: var(--sub-text-color); 
+    letter-spacing: 0.05em; 
+    text-transform: uppercase; 
+    flex-shrink: 0;
+    line-height: 1;        /* ← 追加 */
+}
+
+.stat-num { 
+    text-align: right;
+    color: var(--text-color); 
+    font-variant-numeric: tabular-nums;
+    line-height: 1;        /* ← 追加 */
+    min-width: 28px;       /* ← 桁揺れ防止 */
+}
+
+        .stat-bar-bg { height: 2px; background: var(--border-color); width: 100%; }
         .stat-bar-fill { height: 100%; background: var(--accent-color); transition: 0.6s ease-out; width: 0%; }
 
         .sub-stats { display: flex; gap: 10px; margin-bottom: 25px; flex-shrink: 0; }
@@ -155,7 +192,7 @@
 <div class="preview-area">
     <div id="display-canvas">
         <div class="info-side">
-            <div id="d-scenario" class="scenario-tag">CoC 7th: NEW WORLD</div>
+            <div id="d-scenario" class="scenario-tag">CoC 7th: SCENARIO</div>
             <div class="name-area">
                 <ruby><span id="d-name-main">NAME</span><rt id="d-name-ruby">INVESTIGATOR</rt></ruby>
                 <div id="d-profile-line" class="profile-sub">- / -</div>
@@ -167,14 +204,14 @@
                 <div class="v-slot"><img id="v3-img"></div>
             </div>
             <div class="status-grid">
-                <div class="stat-item"><div class="stat-val-header">STR <span id="val-str">0</span></div><div class="stat-bar-bg"><div id="b-str" class="stat-bar-fill"></div></div></div>
-                <div class="stat-item"><div class="stat-val-header">CON <span id="val-con">0</span></div><div class="stat-bar-bg"><div id="b-con" class="stat-bar-fill"></div></div></div>
-                <div class="stat-item"><div class="stat-val-header">POW <span id="val-pow">0</span></div><div class="stat-bar-bg"><div id="b-pow" class="stat-bar-fill"></div></div></div>
-                <div class="stat-item"><div class="stat-val-header">DEX <span id="val-dex">0</span></div><div class="stat-bar-bg"><div id="b-dex" class="stat-bar-fill"></div></div></div>
-                <div class="stat-item"><div class="stat-val-header">APP <span id="val-app">0</span></div><div class="stat-bar-bg"><div id="b-app" class="stat-bar-fill"></div></div></div>
-                <div class="stat-item"><div class="stat-val-header">SIZ <span id="val-siz">0</span></div><div class="stat-bar-bg"><div id="b-siz" class="stat-bar-fill"></div></div></div>
-                <div class="stat-item"><div class="stat-val-header">INT <span id="val-int">0</span></div><div class="stat-bar-bg"><div id="b-int" class="stat-bar-fill"></div></div></div>
-                <div class="stat-item"><div class="stat-val-header">EDU <span id="val-edu">0</span></div><div class="stat-bar-bg"><div id="b-edu" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header"><span class="stat-label">STR</span><span class="stat-num" id="val-str">0</span></div><div class="stat-bar-bg"><div id="b-str" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header"><span class="stat-label">CON</span><span class="stat-num" id="val-con">0</span></div><div class="stat-bar-bg"><div id="b-con" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header"><span class="stat-label">POW</span><span class="stat-num" id="val-pow">0</span></div><div class="stat-bar-bg"><div id="b-pow" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header"><span class="stat-label">DEX</span><span class="stat-num" id="val-dex">0</span></div><div class="stat-bar-bg"><div id="b-dex" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header"><span class="stat-label">APP</span><span class="stat-num" id="val-app">0</span></div><div class="stat-bar-bg"><div id="b-app" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header"><span class="stat-label">SIZ</span><span class="stat-num" id="val-siz">0</span></div><div class="stat-bar-bg"><div id="b-siz" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header"><span class="stat-label">INT</span><span class="stat-num" id="val-int">0</span></div><div class="stat-bar-bg"><div id="b-int" class="stat-bar-fill"></div></div></div>
+                <div class="stat-item"><div class="stat-val-header"><span class="stat-label">EDU</span><span class="stat-num" id="val-edu">0</span></div><div class="stat-bar-bg"><div id="b-edu" class="stat-bar-fill"></div></div></div>
             </div>
             <div class="sub-stats">
                 <div class="sub-badge"><span class="sub-label">SAN</span><span class="sub-val" id="d-san">0</span></div>
@@ -229,7 +266,7 @@
     function refreshScenarioDisplay() {
         const scInput = document.getElementById('in-scenario');
         const activeEd = document.getElementById('btn-7th').classList.contains('active') ? 7 : 6;
-        update('d-scenario', `CoC ${activeEd}th: ${scInput.value.trim() || "NEW WORLD"}`);
+        update('d-scenario', `CoC ${activeEd}th: ${scInput.value.trim() || "SCENARIO"}`);
     }
 
     function splitNameRuby(fullVal) {

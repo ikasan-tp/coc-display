@@ -11,7 +11,7 @@
             --bg-rgb: 5, 5, 5; 
             --bg-color: #050505; --text-color: #ffffff; --sub-text-color: #888888;
             --accent-color: #C5373C; --border-color: rgba(255,255,255,0.1);
-            --img-shadow: drop-shadow(0 10px 30px rgba(0,0,0,0.7));
+            --img-shadow: drop-shadow(0 10px 40px rgba(0,0,0,0.8));
             --img-x: 0px; --img-y: 0px; --img-scale: 1;
             --v-x: 0px; --v-y: 0px; --v-scale: 1;
             --stat-max: 100;
@@ -21,47 +21,55 @@
         .control-group { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333; }
         h2 { font-size: 0.75rem; color: var(--accent-color); margin-bottom: 12px; letter-spacing: 0.05em; border-left: 4px solid var(--accent-color); padding-left: 10px; font-weight: 700; }
         label { display: block; font-size: 0.65rem; margin-bottom: 2px; color: #aaa; font-weight: bold; }
-        textarea, input { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 6px 8px; border-radius: 4px; font-size: 0.8rem; box-sizing: border-box; font-family: inherit; margin-bottom: 6px; }
+        textarea, input, select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 6px 8px; border-radius: 4px; font-size: 0.8rem; box-sizing: border-box; font-family: inherit; margin-bottom: 6px; }
+        
+        .skill-manager { background: #111; border: 1px solid #444; border-radius: 4px; max-height: 180px; overflow-y: auto; padding: 5px; margin-top: 5px; }
+        .skill-manage-item { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; padding: 4px 0; border-bottom: 1px solid #222; }
+        .skill-manage-item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; transform: scale(1.2); }
+
         .grid-flex { display: flex; gap: 8px; flex-wrap: wrap; }
         .grid-flex > div { flex: 1; min-width: 80px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .edition-btn { flex: 1; padding: 8px; cursor: pointer; border: 1px solid #444; background: #111; color: #888; font-size: 0.7rem; font-weight: bold; }
         .edition-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-        .save-btn { width: 100%; padding: 18px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 900; font-size: 1rem; cursor: pointer; margin-top: 25px; transition: 0.3s; letter-spacing: 0.1em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .save-btn { width: 100%; padding: 18px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 900; font-size: 1rem; cursor: pointer; margin-top: 15px; transition: 0.3s; letter-spacing: 0.1em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         
         .preview-area { flex: 1; display: flex; justify-content: center; align-items: center; background: #151515; padding: 20px; overflow: auto; }
         #display-canvas { width: 800px; height: 800px; background: var(--bg-color); color: var(--text-color); display: flex; position: relative; overflow: hidden; flex-shrink: 0; }
         
-        /* 霧グラデーション */
-        .info-side { 
-            flex: 0 0 65%;
-            padding: 50px 45px; 
-            display: flex; 
-            flex-direction: column; 
-            z-index: 10;
-            background: linear-gradient(
-                to right, 
-                rgba(var(--bg-rgb), 0.85) 0%,
-                rgba(var(--bg-rgb), 0.7) 40%,
-                rgba(var(--bg-rgb), 0.4) 75%,
-                rgba(var(--bg-rgb), 0) 100%
-            );
+        #display-canvas::before {
+            content: "✦";
+            position: absolute;
+            top: 25%;
+            left: 75%;
+            transform: translate(-50%, -50%);
+            font-size: 850px;
+            color: var(--accent-color);
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        .scenario-tag { align-self: flex-start; background: var(--accent-color); color: #fff; font-size: 0.7rem; font-weight: 900; padding: 4px 12px; margin-bottom: 12px; height: 1.2rem; display: flex; align-items: center; }
-        .name-area { border-left: 10px solid var(--accent-color); padding-left: 20px; display: flex; flex-direction: column; justify-content: center; width: 100%; box-sizing: border-box; flex-shrink: 0; min-height: 110px; margin-bottom: 5px; }
+        .info-side { 
+            flex: 0 0 75%; padding: 45px 50px; display: flex; flex-direction: column; z-index: 10;
+            background: linear-gradient(to right, rgba(var(--bg-rgb), 1) 0%, rgba(var(--bg-rgb), 1) 50%, rgba(var(--bg-rgb), 0.8) 65%, rgba(var(--bg-rgb), 0) 85%);
+        }
+
+        .scenario-tag { align-self: flex-start; background: var(--accent-color); color: #fff; font-size: 0.7rem; font-weight: 900; padding: 4px 12px; margin-bottom: 10px; height: 1.2rem; display: flex; align-items: center; }
+        .name-area { position: relative; border-left: 10px solid var(--accent-color); padding-left: 20px; display: flex; flex-direction: column; justify-content: center; width: 100%; box-sizing: border-box; flex-shrink: 0; min-height: 100px; margin-bottom: 5px; }
+        
         ruby { display: flex; flex-direction: column-reverse; width: 100%; align-items: flex-start; }
         rt { font-size: 0.85rem; letter-spacing: 0.3em; color: var(--accent-color); margin-bottom: 2px; font-weight: 700; text-transform: uppercase; text-align: left; line-height: 1.2; }
         #d-name-main { font-size: 3.8rem; font-weight: 900; line-height: 1; white-space: nowrap; display: inline-block; transform-origin: left center; }
         .profile-sub { font-size: 0.85rem; color: var(--sub-text-color); margin: 8px 0 0 0; line-height: 1; }
         .traits-display { font-size: 0.75rem; font-weight: 700; color: var(--accent-color); margin: 5px 0 0 20px; min-height: 1.2em; opacity: 0.9; }
 
-        .variants-row { display: flex; gap: 10px; margin: 15px 0 20px 0; flex-shrink: 0; height: 105px; }
-        .v-slot { width: 105px; height: 105px; background: rgba(var(--bg-rgb), 0.2); border: 1px solid var(--border-color); overflow: hidden; position: relative; }
-        .v-slot img { position: absolute; left: 50%; top: 50%; width: 100%; transform: translate(calc(-50% + var(--v-x)), calc(-50% + var(--v-y))) scale(var(--v-scale)); object-fit: contain; display: none; }
+        .variants-row { display: flex; gap: 10px; margin: 15px 0 20px 0; flex-shrink: 0; height: 85px; }
+        .v-slot { width: 85px; height: 85px; background: rgba(var(--bg-rgb), 0.2); border: 1px solid var(--border-color); overflow: hidden; position: relative; }
+        .v-slot img { position: absolute; left: 50%; top: 50%; width: 100%; transform: translate(calc(-50% + var(--v-x)), calc(-50% + var(--v-y))) scale(var(--v-scale)); object-fit: contain; }
 
-        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 40px; margin-bottom: 25px; flex-shrink: 0; }
+        .status-grid { display: grid; grid-template-columns: repeat(2, 160px); gap: 12px 40px; margin-bottom: 12px; flex-shrink: 0; }
         .stat-item { width: 100%; }
         .stat-val-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: 900; margin-bottom: 4px; height: 16px; }
         .stat-label { display: inline-block; width: 45px; text-align: left; color: var(--sub-text-color); letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0; line-height: 1; }
@@ -69,25 +77,28 @@
         .stat-bar-bg { height: 2px; background: var(--border-color); width: 100%; }
         .stat-bar-fill { height: 100%; background: var(--accent-color); transition: 0.6s ease-out; width: 0%; }
 
-        .sub-stats { display: flex; gap: 10px; margin-bottom: 25px; flex-shrink: 0; }
+        .sub-stats { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; width: 360px; }
         .sub-badge { flex: 1; padding: 10px 2px; background: rgba(var(--bg-rgb), 0.3); border-left: 3px solid var(--accent-color); text-align: center; display: flex; flex-direction: column; justify-content: center; }
         .sub-label { font-size: 0.6rem; color: var(--sub-text-color); font-weight: 700; display: block; margin-bottom: 2px; line-height: 1; }
         .sub-val { font-size: 1.3rem; font-weight: 900; line-height: 1; }
 
-        .skills-container { border-top: 1px solid var(--border-color); padding-top: 15px; flex-grow: 1; overflow: hidden; }
-        #skills-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px 15px; }
-        .skill-item { font-size: 0.65rem; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
-        .skill-val { color: var(--accent-color); font-weight: 700; }
+        .skills-container { padding-top: 5px; flex-grow: 1; width: 450px; }
+        .skills-header { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 900; color: var(--accent-color); margin-bottom: 12px; letter-spacing: 0.2em; }
+        .skills-header::after { content: ""; flex: 1; height: 1px; background: var(--accent-color); opacity: 0.4; }
         
-        .image-side { 
-            position: absolute; 
-            right: 0; top: 0; 
-            width: 100%; height: 100%; 
-            z-index: 1; 
-            display: flex; justify-content: flex-end; align-items: flex-end; 
-        }
-        .accent-bg { position: absolute; top: 0; right: 0; width: 50%; height: 100%; background: linear-gradient(135deg, transparent, var(--accent-color)); opacity: 0.08; clip-path: polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%); }
+        #skills-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 30px; }
+        .skill-item { font-size: 0.7rem; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 1px; align-items: center; }
+        .skill-name-group { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+        .skill-check { width: 7px; height: 7px; border: 1.5px solid var(--accent-color); flex-shrink: 0; }
+        .skill-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+        .skill-val { color: var(--accent-color); font-weight: 900; font-size: 0.8rem; }
+        
+        .image-side { position: absolute; right: 0; top: 0; width: 100%; height: 100%; z-index: 1; display: flex; justify-content: flex-end; align-items: flex-end; }
+        .accent-bg { position: absolute; top: 0; right: 0; width: 55%; height: 100%; background: var(--accent-color); opacity: 0.35; clip-path: polygon(40% 0%, 100% 0%, 100% 100%, 0% 100%); z-index: 1; }
         #main-img { height: 98%; z-index: 2; transform: translate(var(--img-x), var(--img-y)) scale(var(--img-scale)); filter: var(--img-shadow); display: none; pointer-events: none; }
+        
+        .theme-toggle-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .theme-btn { padding: 6px; cursor: pointer; border: 1px solid #444; background: #111; color: #fff; font-size: 0.65rem; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -103,15 +114,17 @@
     <div class="control-group">
         <h2>2. プロフィール</h2>
         <div class="grid-2">
-            <div><label>名前</label><input type="text" id="in-name" oninput="splitNameRuby(this.value)"></div>
+            <div><label>名前</label><input type="text" id="in-name" oninput="updateNameDisp()"></div>
             <div><label>フリガナ</label><input type="text" id="in-ruby" oninput="refreshProfileDisplay()"></div>
         </div>
         <div class="grid-flex">
             <div style="flex: 2;"><label>シナリオ</label><input type="text" id="in-scenario" oninput="refreshScenarioDisplay()"></div>
-            <div><label>性別</label><input type="text" id="in-sex" oninput="refreshProfileDisplay()"></div>
-            <div><label>年齢</label><input type="text" id="in-age" oninput="refreshProfileDisplay()"></div>
         </div>
-        <label>職業</label><input type="text" id="in-job" oninput="refreshProfileDisplay()">
+        <div class="grid-flex">
+            <div><label>年齢</label><input type="text" id="in-age" oninput="refreshProfileDisplay()"></div>
+            <div><label>性別</label><input type="text" id="in-sex" oninput="refreshProfileDisplay()"></div>
+            <div><label>職業</label><input type="text" id="in-job" oninput="refreshProfileDisplay()"></div>
+        </div>
         <div class="grid-2" style="margin-top:5px;">
             <div><label>特徴1</label><input type="text" id="in-t1-name" oninput="updateTrait()"></div>
             <div><label>特徴2</label><input type="text" id="in-t2-name" oninput="updateTrait()"></div>
@@ -137,34 +150,39 @@
             <div><label>HP</label><input type="number" id="in-hp" oninput="updateVal('d-hp', this.value, '0')"></div>
             <div><label>MP</label><input type="number" id="in-mp" oninput="updateVal('d-mp', this.value, '0')"></div>
         </div>
-        <label style="margin-top:10px;">技能一覧</label>
-        <textarea id="in-skills" oninput="refreshSkills()" style="min-height:80px;"></textarea>
+        <div style="margin-top:10px;">
+            <div class="grid-2">
+                <div><label>表示数上限</label><input type="number" id="skill-limit" value="16" max="20" oninput="refreshSkills()"></div>
+                <div><label>ソート</label><select id="skill-sort" onchange="refreshSkills()"><option value="desc" selected>高い順</option><option value="none">登録順</option></select></div>
+            </div>
+            <div id="skill-manager-list" class="skill-manager"></div>
+        </div>
     </div>
     <div class="control-group">
-        <h2>4. メイン立ち絵調整</h2>
-        <input type="file" onchange="loadImg(this, 'main-img')">
+        <h2>4. 立ち絵画像</h2>
+        <label>メイン立ち絵</label><input type="file" onchange="loadImg(this, 'main-img')">
         <div class="grid-3">
             <div><label>左右</label><input type="range" min="-600" max="600" value="0" oninput="setPos('--img-x', this.value)"></div>
             <div><label>上下</label><input type="range" min="-600" max="600" value="0" oninput="setPos('--img-y', this.value)"></div>
             <div><label>拡大</label><input type="range" min="0.1" max="4" step="0.01" value="1" oninput="setPos('--img-scale', this.value)"></div>
         </div>
-        <h2 style="margin-top: 15px;">5. 差分調整</h2>
+        <label style="margin-top:10px;">差分（3つまで）</label>
+        <div class="grid-3"><input type="file" onchange="loadImg(this, 'v1-img')"><input type="file" onchange="loadImg(this, 'v2-img')"><input type="file" onchange="loadImg(this, 'v3-img')"></div>
         <div class="grid-3">
-            <input type="file" onchange="loadImg(this, 'v1-img')">
-            <input type="file" onchange="loadImg(this, 'v2-img')">
-            <input type="file" onchange="loadImg(this, 'v3-img')">
+            <div><label>差分左右</label><input type="range" min="-150" max="150" value="0" oninput="setPos('--v-x', this.value)"></div>
+            <div><label>差分上下</label><input type="range" min="-150" max="150" value="0" oninput="setPos('--v-y', this.value)"></div>
+            <div><label>差分拡大</label><input type="range" min="0.1" max="5" step="0.01" value="1" oninput="setPos('--v-scale', this.value)"></div>
         </div>
-        <div class="grid-3">
-            <div><label>左右</label><input type="range" min="-150" max="150" value="0" oninput="setPos('--v-x', this.value)"></div>
-            <div><label>上下</label><input type="range" min="-150" max="150" value="0" oninput="setPos('--v-y', this.value)"></div>
-            <div><label>拡大</label><input type="range" min="0.1" max="5" step="0.01" value="1" oninput="setPos('--v-scale', this.value)"></div>
+    </div>
+    <div class="control-group">
+        <h2>5. アクセントカラー & テーマ</h2>
+        <input type="color" id="color-picker" value="#C5373C" style="height:40px; border:none; width:100%; cursor:pointer;">
+        
+        <div class="theme-toggle-btns">
+            <button class="theme-btn" onclick="applyTheme('dark')">ダークモード</button>
+            <button class="theme-btn" onclick="applyTheme('light')" style="background:#eee; color:#111;">ライトモード</button>
         </div>
-
-        <div class="grid-2" style="margin-top: 15px;">
-            <button onclick="applyTheme('dark')" style="cursor:pointer; padding:8px; background:#111; color:#fff; border:1px solid #444;">ダーク</button>
-            <button onclick="applyTheme('light')" style="cursor:pointer; padding:8px; background:#eee; color:#111; border:1px solid #ccc;">ライト</button>
-        </div>
-        <input type="color" id="color-picker" value="#C5373C" style="margin-top:8px; height:30px; border:none; width:100%;">
+        
         <button class="save-btn" onclick="saveImage()">画像保存</button>
     </div>
 </div>
@@ -175,7 +193,7 @@
             <div id="d-scenario" class="scenario-tag">CoC 7th: SCENARIO</div>
             <div class="name-area">
                 <ruby><span id="d-name-main">NAME</span><rt id="d-name-ruby">INVESTIGATOR</rt></ruby>
-                <div id="d-profile-line" class="profile-sub">- / -</div>
+                <div id="d-profile-line" class="profile-sub">- / - / -</div>
             </div>
             <div id="d-traits" class="traits-display"></div>
             <div class="variants-row">
@@ -200,7 +218,7 @@
                 <div class="sub-badge"><span class="sub-label">MP</span><span class="sub-val" id="d-mp">0</span></div>
             </div>
             <div class="skills-container">
-                <div style="font-size: 0.7rem; font-weight: 900; color: var(--accent-color); margin-bottom: 8px; letter-spacing: 0.2em;">SKILLS</div>
+                <div class="skills-header">SKILLS</div>
                 <div id="skills-list"></div>
             </div>
         </div>
@@ -210,8 +228,24 @@
 
 <script>
     const root = document.documentElement;
+    let allSkills = [];
+
     document.getElementById('json-input').oninput = importData;
     document.getElementById('color-picker').oninput = (e) => root.style.setProperty('--accent-color', e.target.value);
+
+    function updateNameDisp() {
+        const inputName = document.getElementById('in-name');
+        const inputRuby = document.getElementById('in-ruby');
+        const fullVal = inputName.value;
+        const match = fullVal.match(/^(.+?)\s*[（(\[](.*?)[）)\]]$/);
+        if (match) {
+            inputName.value = match[1].trim();
+            inputRuby.value = match[2].trim();
+        }
+        document.getElementById('d-name-main').innerText = inputName.value || 'NAME';
+        document.getElementById('d-name-ruby').innerText = inputRuby.value || 'INVESTIGATOR';
+        refreshProfileDisplay();
+    }
 
     function updateTrait() {
         const t1 = document.getElementById('in-t1-name').value.trim();
@@ -219,36 +253,26 @@
         document.getElementById('d-traits').innerText = (t1 && t2) ? `${t1} / ${t2}` : (t1 || t2 || "");
     }
 
-    function adjustNameFontSize() {
-        const nameEl = document.getElementById('d-name-main');
-        const maxWidth = 350; 
-        let fontSize = 3.8; 
-        nameEl.style.fontSize = fontSize + "rem";
-        while (nameEl.offsetWidth > maxWidth && fontSize > 1.0) { fontSize -= 0.1; nameEl.style.fontSize = fontSize + "rem"; }
-    }
-
     function refreshProfileDisplay() {
         document.getElementById('d-name-ruby').innerText = document.getElementById('in-ruby').value.trim() || "INVESTIGATOR";
-        const sex = document.getElementById('in-sex').value.trim() || "-";
         const age = document.getElementById('in-age').value.trim() || "-";
-        const job = document.getElementById('in-job').value.trim();
-        document.getElementById('d-profile-line').innerText = `${sex} / ${age}${job ? ' / ' + job : ''}`;
+        const sex = document.getElementById('in-sex').value.trim() || "-";
+        const job = document.getElementById('in-job').value.trim() || "-";
+        document.getElementById('d-profile-line').innerText = `${age} / ${sex} / ${job}`;
         adjustNameFontSize();
+    }
+
+    function adjustNameFontSize() {
+        const nameEl = document.getElementById('d-name-main');
+        let fontSize = 3.8;
+        nameEl.style.fontSize = fontSize + "rem";
+        while (nameEl.offsetWidth > 380 && fontSize > 1.0) { fontSize -= 0.1; nameEl.style.fontSize = fontSize + "rem"; }
     }
 
     function refreshScenarioDisplay() {
         const activeEd = document.getElementById('btn-7th').classList.contains('active') ? 7 : 6;
         const sc = document.getElementById('in-scenario').value.trim() || "SCENARIO";
         document.getElementById('d-scenario').innerText = `CoC ${activeEd}th: ${sc}`;
-    }
-
-    function splitNameRuby(fullVal) {
-        const nameInput = document.getElementById('in-name'), rubyInput = document.getElementById('in-ruby');
-        const match = fullVal.match(/^(.+?)\s*[（(](.+?)[）)]$/);
-        if (match) { nameInput.value = match[1].trim(); rubyInput.value = match[2].trim(); }
-        else { nameInput.value = fullVal; rubyInput.value = ""; }
-        document.getElementById('d-name-main').innerText = nameInput.value || 'NAME';
-        refreshProfileDisplay();
     }
 
     function updateVal(id, val, def) { document.getElementById(id).innerText = val || def; }
@@ -258,79 +282,94 @@
             const raw = document.getElementById('json-input').value;
             if(!raw) return;
             const json = JSON.parse(raw);
-            const d = json.data || {};
-            
-            // --- エディション自動判定ロジック ---
-            if (d.commands) {
-                if (d.commands.includes("CCB")) {
-                    setEdition(6); // CCBがあれば6版
-                } else if (d.commands.includes("CC")) {
-                    setEdition(7); // CCBがなくてCCがあれば7版
+            const d = json.data || json;
+            if (d.commands && d.commands.includes("CCB")) setEdition(6); else setEdition(7);
+            let nameTarget = d.name || "";
+            let rubyTarget = "";
+            if (d.memo) {
+                const pcMatch = d.memo.match(/PC：\s*(.+)/);
+                const rubyMatch = d.memo.match(/ふりがな：\s*(.+)/);
+                if (pcMatch) nameTarget = pcMatch[1].trim();
+                if (rubyMatch) rubyTarget = rubyMatch[1].trim();
+                if (!nameTarget) {
+                    const firstLine = d.memo.split('\n')[0].trim();
+                    if (firstLine) nameTarget = firstLine;
                 }
             }
-
-            // 1. 基本ステータス
+            document.getElementById('in-name').value = nameTarget;
+            document.getElementById('in-ruby').value = rubyTarget;
+            updateNameDisp();
+            if (d.age) document.getElementById('in-age').value = d.age;
+            if (d.sex) document.getElementById('in-sex').value = d.sex;
+            if (d.job) document.getElementById('in-job').value = d.job;
             const params = ["str","con","pow","dex","app","siz","int","edu"];
-            if (d.params) d.params.forEach(p => {
-                const l = p.label.toLowerCase(); 
-                if(params.includes(l)) { 
-                    document.getElementById('in-'+l).value = p.value; 
-                    setBar(l, p.value); 
-                }
-            });
-
-            // 2. 状態マップ
-            const statusMap = {'hp':'hp', 'mp':'mp', 'san':'san', '幸運':'luk', 'こううん':'luk', 'san値':'san'};
-            if (d.status) d.status.forEach(s => {
-                const id = statusMap[s.label.toLowerCase()] || statusMap[s.label];
-                if(id) { 
-                    document.getElementById('in-' + id).value = s.value; 
-                    updateVal('d-' + id, s.value, '0'); 
-                }
-            });
-
-            // 3. コマンドから抽出
-            let extractedSkills = [];
+            if (d.params) {
+                d.params.forEach(p => {
+                    const l = p.label.toLowerCase(); 
+                    if(params.includes(l)) { document.getElementById('in-'+l).value = p.value; setBar(l, p.value); }
+                });
+            } else {
+                params.forEach(p => { if (d[p] !== undefined) { document.getElementById('in-'+p).value = d[p]; setBar(p, d[p]); } });
+            }
+            const statusMap = {'hp':'hp','mp':'mp','san':'san','luck':'luk','幸運':'luk','こううん':'luk','san値':'san'};
+            if (d.status) {
+                d.status.forEach(s => {
+                    const id = statusMap[s.label.toLowerCase()] || statusMap[s.label];
+                    if(id) { document.getElementById('in-' + id).value = s.value; updateVal('d-' + id, s.value, '0'); }
+                });
+            } else {
+                Object.keys(statusMap).forEach(key => {
+                    const id = statusMap[key];
+                    if (d[key] !== undefined) { document.getElementById('in-' + id).value = d[key]; updateVal('d-' + id, d[key], '0'); }
+                });
+            }
+            allSkills = [];
             if (d.commands) {
                 const lines = d.commands.split('\n');
                 lines.forEach(line => {
-                    // CCB<=60 【幸運】 のような形式に対応
                     const match = line.match(/CCB?\(?.*?\)?<=?(\d+)\s+【(.+?)】/);
                     if (match) {
-                        const val = match[1];
+                        const val = parseInt(match[1]);
                         const label = match[2].trim();
-                        const sId = statusMap[label.toLowerCase()] || statusMap[label];
-                        if (sId) {
-                            // ステータスなら専用欄へ
-                            document.getElementById('in-' + sId).value = val;
-                            updateVal('d-' + sId, val, '0');
-                        } else {
-                            // 技能ならリストへ
-                            extractedSkills.push(`${label} ${val}`);
-                        }
+                        if (label === "幸運") { document.getElementById('in-luk').value = val; updateVal('d-luk', val, '0'); }
+                        else if (!statusMap[label.toLowerCase()] && !statusMap[label]) { allSkills.push({ label, value: val, visible: val > 40 }); }
                     }
                 });
             }
-
-            // 4. 専用技能配列
-            if (d.skills) {
-                d.skills.forEach(s => {
-                    const label = s.label;
-                    if (!statusMap[label.toLowerCase()] && !statusMap[label]) {
-                        extractedSkills.push(`${label} ${s.value}`);
-                    }
-                });
-            }
-
-            if (extractedSkills.length > 0) {
-                document.getElementById('in-skills').value = [...new Set(extractedSkills)].join('\n');
-                refreshSkills();
-            }
-
-            if (d.name) splitNameRuby(d.name);
+            allSkills = allSkills.filter((v, i, a) => a.findIndex(t => t.label === v.label) === i);
+            buildSkillManager();
+            refreshSkills();
             if (d.color) { root.style.setProperty('--accent-color', d.color); document.getElementById('color-picker').value = d.color; }
+            refreshScenarioDisplay();
             refreshProfileDisplay();
-        } catch (e) { console.error("Load Error:", e); }
+        } catch (e) { console.error(e); }
+    }
+
+    function buildSkillManager() {
+        const container = document.getElementById('skill-manager-list');
+        container.innerHTML = "";
+        allSkills.forEach((s, index) => {
+            const div = document.createElement('div');
+            div.className = 'skill-manage-item';
+            div.innerHTML = `<input type="checkbox" id="sm-${index}" ${s.visible ? 'checked' : ''} onchange="toggleSkillVisible(${index})"><label for="sm-${index}" style="margin:0; color:white; flex-grow:1; cursor:pointer;">${s.label}(${s.value})</label>`;
+            container.appendChild(div);
+        });
+    }
+
+    function toggleSkillVisible(index) { allSkills[index].visible = document.getElementById(`sm-${index}`).checked; refreshSkills(); }
+
+    function refreshSkills() {
+        const list = document.getElementById('skills-list');
+        list.innerHTML = "";
+        const limit = parseInt(document.getElementById('skill-limit').value) || 16;
+        let displayData = allSkills.filter(s => s.visible);
+        if (document.getElementById('skill-sort').value === "desc") displayData.sort((a, b) => b.value - a.value);
+        displayData.slice(0, limit).forEach(s => {
+            const item = document.createElement('div');
+            item.className = 'skill-item';
+            item.innerHTML = `<div class="skill-name-group"><div class="skill-check"></div><span class="skill-name">${s.label}</span></div><span class="skill-val">${s.value}</span>`;
+            list.appendChild(item);
+        });
     }
 
     function setBar(id, val) { 
@@ -339,20 +378,6 @@
         if(bar) bar.style.width = Math.min((val / max) * 100, 100) + '%';
         const num = document.getElementById('val-' + id);
         if(num) num.innerText = val;
-    }
-
-    function refreshSkills() {
-        const list = document.getElementById('skills-list'); list.innerHTML = "";
-        const lines = document.getElementById('in-skills').value.split('\n');
-        lines.forEach(line => {
-            if(!line.trim()) return;
-            const match = line.match(/(.+?)\s*[:\s=]\s*(\d+)/) || line.match(/(.+?)\s+(\d+)/);
-            if (match) {
-                const item = document.createElement('div'); item.className = 'skill-item';
-                item.innerHTML = `${match[1].trim()}<span class="skill-val">${match[2]}</span>`;
-                list.appendChild(item);
-            }
-        });
     }
 
     function setPos(p, v) { root.style.setProperty(p, p.includes('scale') ? v : v + 'px'); }
@@ -368,12 +393,11 @@
         root.style.setProperty('--text-color', isDark ? '#ffffff' : '#111111');
         root.style.setProperty('--sub-text-color', isDark ? '#888888' : '#666666');
         root.style.setProperty('--border-color', isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)');
-        root.style.setProperty('--img-shadow', isDark ? 'drop-shadow(0 10px 30px rgba(0,0,0,0.7))' : 'drop-shadow(0 5px 15px rgba(0,0,0,0.08))');
     }
 
     function saveImage() {
         html2canvas(document.getElementById('display-canvas'), { scale: 2, useCORS: true }).then(c => {
-            const a = document.createElement('a'); a.download = `character_sheet.png`; a.href = c.toDataURL(); a.click();
+            const a = document.createElement('a'); a.download = `display.png`; a.href = c.toDataURL(); a.click();
         });
     }
 
@@ -383,11 +407,10 @@
         document.getElementById('btn-6th').classList.toggle('active', ed === 6);
         refreshScenarioDisplay();
         ["str","con","pow","dex","app","siz","int","edu"].forEach(id => {
-            const inputVal = document.getElementById('in-' + id).value;
-            if(inputVal) setBar(id, inputVal);
+            const v = document.getElementById('in-' + id).value;
+            if(v) setBar(id, v);
         });
     }
-    setEdition(7);
 </script>
 </body>
 </html>

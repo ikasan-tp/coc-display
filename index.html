@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
+            --bg-rgb: 5, 5, 5; 
             --bg-color: #050505; --text-color: #ffffff; --sub-text-color: #888888;
             --accent-color: #C5373C; --border-color: rgba(255,255,255,0.1);
             --img-shadow: drop-shadow(0 10px 30px rgba(0,0,0,0.7));
@@ -32,71 +33,44 @@
         .preview-area { flex: 1; display: flex; justify-content: center; align-items: center; background: #151515; padding: 20px; overflow: auto; }
         #display-canvas { width: 800px; height: 800px; background: var(--bg-color); color: var(--text-color); display: flex; position: relative; overflow: hidden; flex-shrink: 0; }
         
-        .info-side { flex: 0 0 55%; padding: 50px 45px; display: flex; flex-direction: column; z-index: 10; }
-        .scenario-tag { align-self: flex-start; background: var(--accent-color); color: #fff; font-size: 0.7rem; font-weight: 900; padding: 4px 12px; margin-bottom: 12px; height: 1.2rem; display: flex; align-items: center; }
+        /* 霧グラデーション */
+        .info-side { 
+            flex: 0 0 65%;
+            padding: 50px 45px; 
+            display: flex; 
+            flex-direction: column; 
+            z-index: 10;
+            background: linear-gradient(
+                to right, 
+                rgba(var(--bg-rgb), 0.85) 0%,
+                rgba(var(--bg-rgb), 0.7) 40%,
+                rgba(var(--bg-rgb), 0.4) 75%,
+                rgba(var(--bg-rgb), 0) 100%
+            );
+        }
 
+        .scenario-tag { align-self: flex-start; background: var(--accent-color); color: #fff; font-size: 0.7rem; font-weight: 900; padding: 4px 12px; margin-bottom: 12px; height: 1.2rem; display: flex; align-items: center; }
         .name-area { border-left: 10px solid var(--accent-color); padding-left: 20px; display: flex; flex-direction: column; justify-content: center; width: 100%; box-sizing: border-box; flex-shrink: 0; min-height: 110px; margin-bottom: 5px; }
         ruby { display: flex; flex-direction: column-reverse; width: 100%; align-items: flex-start; }
         rt { font-size: 0.85rem; letter-spacing: 0.3em; color: var(--accent-color); margin-bottom: 2px; font-weight: 700; text-transform: uppercase; text-align: left; line-height: 1.2; }
         #d-name-main { font-size: 3.8rem; font-weight: 900; line-height: 1; white-space: nowrap; display: inline-block; transform-origin: left center; }
         .profile-sub { font-size: 0.85rem; color: var(--sub-text-color); margin: 8px 0 0 0; line-height: 1; }
-
         .traits-display { font-size: 0.75rem; font-weight: 700; color: var(--accent-color); margin: 5px 0 0 20px; min-height: 1.2em; opacity: 0.9; }
 
         .variants-row { display: flex; gap: 10px; margin: 15px 0 20px 0; flex-shrink: 0; height: 105px; }
-        .v-slot { width: 105px; height: 105px; background: rgba(128,128,128,0.05); border: 1px solid var(--border-color); overflow: hidden; position: relative; }
-        .v-slot img { 
-            position: absolute;
-            left: 50%; top: 50%;
-            width: 100%;
-            transform: translate(calc(-50% + var(--v-x)), calc(-50% + var(--v-y))) scale(var(--v-scale));
-            object-fit: contain; display: none; 
-        }
+        .v-slot { width: 105px; height: 105px; background: rgba(var(--bg-rgb), 0.2); border: 1px solid var(--border-color); overflow: hidden; position: relative; }
+        .v-slot img { position: absolute; left: 50%; top: 50%; width: 100%; transform: translate(calc(-50% + var(--v-x)), calc(-50% + var(--v-y))) scale(var(--v-scale)); object-fit: contain; display: none; }
 
-        /* --- ステータス：縦ライン完全整列版 --- */
-        .status-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px 40px; 
-            margin-bottom: 25px; 
-            flex-shrink: 0; 
-        }
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 40px; margin-bottom: 25px; flex-shrink: 0; }
         .stat-item { width: 100%; }
-
-.stat-val-header { 
-    display: flex; 
-    justify-content: space-between;
-    align-items: center;   /* baseline → center */
-    font-size: 0.75rem; 
-    font-weight: 900; 
-    margin-bottom: 4px;
-    height: 16px;          /* 行高さ固定で安定 */
-}
-
-.stat-label { 
-    display: inline-block;
-    width: 45px; 
-    text-align: left;
-    color: var(--sub-text-color); 
-    letter-spacing: 0.05em; 
-    text-transform: uppercase; 
-    flex-shrink: 0;
-    line-height: 1;        /* ← 追加 */
-}
-
-.stat-num { 
-    text-align: right;
-    color: var(--text-color); 
-    font-variant-numeric: tabular-nums;
-    line-height: 1;        /* ← 追加 */
-    min-width: 28px;       /* ← 桁揺れ防止 */
-}
-
+        .stat-val-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: 900; margin-bottom: 4px; height: 16px; }
+        .stat-label { display: inline-block; width: 45px; text-align: left; color: var(--sub-text-color); letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0; line-height: 1; }
+        .stat-num { text-align: right; color: var(--text-color); font-variant-numeric: tabular-nums; line-height: 1; min-width: 28px; }
         .stat-bar-bg { height: 2px; background: var(--border-color); width: 100%; }
         .stat-bar-fill { height: 100%; background: var(--accent-color); transition: 0.6s ease-out; width: 0%; }
 
         .sub-stats { display: flex; gap: 10px; margin-bottom: 25px; flex-shrink: 0; }
-        .sub-badge { flex: 1; padding: 10px 2px; background: rgba(128,128,128,0.05); border-left: 3px solid var(--accent-color); text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .sub-badge { flex: 1; padding: 10px 2px; background: rgba(var(--bg-rgb), 0.3); border-left: 3px solid var(--accent-color); text-align: center; display: flex; flex-direction: column; justify-content: center; }
         .sub-label { font-size: 0.6rem; color: var(--sub-text-color); font-weight: 700; display: block; margin-bottom: 2px; line-height: 1; }
         .sub-val { font-size: 1.3rem; font-weight: 900; line-height: 1; }
 
@@ -105,9 +79,15 @@
         .skill-item { font-size: 0.65rem; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .skill-val { color: var(--accent-color); font-weight: 700; }
         
-        .image-side { flex: 1; position: relative; display: flex; justify-content: center; align-items: flex-end; }
-        .accent-bg { position: absolute; top: 0; right: 0; width: 75%; height: 100%; background: linear-gradient(135deg, transparent, var(--accent-color)); opacity: 0.08; clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%); }
-        #main-img { height: 98%; z-index: 5; transform: translate(var(--img-x), var(--img-y)) scale(var(--img-scale)); filter: var(--img-shadow); display: none; pointer-events: none; }
+        .image-side { 
+            position: absolute; 
+            right: 0; top: 0; 
+            width: 100%; height: 100%; 
+            z-index: 1; 
+            display: flex; justify-content: flex-end; align-items: flex-end; 
+        }
+        .accent-bg { position: absolute; top: 0; right: 0; width: 50%; height: 100%; background: linear-gradient(135deg, transparent, var(--accent-color)); opacity: 0.08; clip-path: polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%); }
+        #main-img { height: 98%; z-index: 2; transform: translate(var(--img-x), var(--img-y)) scale(var(--img-scale)); filter: var(--img-shadow); display: none; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -152,10 +132,10 @@
             <div><label>EDU</label><input type="number" id="in-edu" oninput="setBar('edu', this.value)"></div>
         </div>
         <div class="grid-flex" style="margin-top: 10px;">
-            <div><label>SAN</label><input type="number" id="in-san" oninput="update('d-san', this.value, '0')"></div>
-            <div><label>幸運</label><input type="number" id="in-luk" oninput="update('d-luk', this.value, '0')"></div>
-            <div><label>HP</label><input type="number" id="in-hp" oninput="update('d-hp', this.value, '0')"></div>
-            <div><label>MP</label><input type="number" id="in-mp" oninput="update('d-mp', this.value, '0')"></div>
+            <div><label>SAN</label><input type="number" id="in-san" oninput="updateVal('d-san', this.value, '0')"></div>
+            <div><label>幸運</label><input type="number" id="in-luk" oninput="updateVal('d-luk', this.value, '0')"></div>
+            <div><label>HP</label><input type="number" id="in-hp" oninput="updateVal('d-hp', this.value, '0')"></div>
+            <div><label>MP</label><input type="number" id="in-mp" oninput="updateVal('d-mp', this.value, '0')"></div>
         </div>
         <label style="margin-top:10px;">技能一覧</label>
         <textarea id="in-skills" oninput="refreshSkills()" style="min-height:80px;"></textarea>
@@ -168,7 +148,7 @@
             <div><label>上下</label><input type="range" min="-600" max="600" value="0" oninput="setPos('--img-y', this.value)"></div>
             <div><label>拡大</label><input type="range" min="0.1" max="4" step="0.01" value="1" oninput="setPos('--img-scale', this.value)"></div>
         </div>
-        <h2 style="margin-top: 15px;">5. 差分調整（3枚一括）</h2>
+        <h2 style="margin-top: 15px;">5. 差分調整</h2>
         <div class="grid-3">
             <input type="file" onchange="loadImg(this, 'v1-img')">
             <input type="file" onchange="loadImg(this, 'v2-img')">
@@ -236,121 +216,136 @@
     function updateTrait() {
         const t1 = document.getElementById('in-t1-name').value.trim();
         const t2 = document.getElementById('in-t2-name').value.trim();
-        const display = document.getElementById('d-traits');
-        display.innerText = (t1 && t2) ? `${t1} / ${t2}` : (t1 || t2 || "");
+        document.getElementById('d-traits').innerText = (t1 && t2) ? `${t1} / ${t2}` : (t1 || t2 || "");
     }
 
     function adjustNameFontSize() {
         const nameEl = document.getElementById('d-name-main');
-        const container = document.querySelector('.name-area');
-        const maxWidth = container.clientWidth - 45; 
+        const maxWidth = 350; 
         let fontSize = 3.8; 
         nameEl.style.fontSize = fontSize + "rem";
-        while (nameEl.offsetWidth > maxWidth && fontSize > 1.0) {
-            fontSize -= 0.1;
-            nameEl.style.fontSize = fontSize + "rem";
-        }
+        while (nameEl.offsetWidth > maxWidth && fontSize > 1.0) { fontSize -= 0.1; nameEl.style.fontSize = fontSize + "rem"; }
     }
 
     function refreshProfileDisplay() {
-        const rubyVal = document.getElementById('in-ruby').value.trim();
-        document.getElementById('d-name-ruby').innerText = rubyVal || "INVESTIGATOR";
+        document.getElementById('d-name-ruby').innerText = document.getElementById('in-ruby').value.trim() || "INVESTIGATOR";
         const sex = document.getElementById('in-sex').value.trim() || "-";
         const age = document.getElementById('in-age').value.trim() || "-";
         const job = document.getElementById('in-job').value.trim();
-        let profileLine = `${sex} / ${age}${job ? ' / ' + job : ''}`;
-        document.getElementById('d-profile-line').innerText = profileLine;
+        document.getElementById('d-profile-line').innerText = `${sex} / ${age}${job ? ' / ' + job : ''}`;
         adjustNameFontSize();
     }
 
     function refreshScenarioDisplay() {
-        const scInput = document.getElementById('in-scenario');
         const activeEd = document.getElementById('btn-7th').classList.contains('active') ? 7 : 6;
-        update('d-scenario', `CoC ${activeEd}th: ${scInput.value.trim() || "SCENARIO"}`);
+        const sc = document.getElementById('in-scenario').value.trim() || "SCENARIO";
+        document.getElementById('d-scenario').innerText = `CoC ${activeEd}th: ${sc}`;
     }
 
     function splitNameRuby(fullVal) {
-        const nameInput = document.getElementById('in-name');
-        const rubyInput = document.getElementById('in-ruby');
+        const nameInput = document.getElementById('in-name'), rubyInput = document.getElementById('in-ruby');
         const match = fullVal.match(/^(.+?)\s*[（(](.+?)[）)]$/);
         if (match) { nameInput.value = match[1].trim(); rubyInput.value = match[2].trim(); }
         else { nameInput.value = fullVal; rubyInput.value = ""; }
-        update('d-name-main', nameInput.value || 'NAME');
+        document.getElementById('d-name-main').innerText = nameInput.value || 'NAME';
         refreshProfileDisplay();
     }
 
+    function updateVal(id, val, def) { document.getElementById(id).innerText = val || def; }
+
     function importData() {
-        const raw = document.getElementById('json-input').value;
-        if (!raw) return;
         try {
+            const raw = document.getElementById('json-input').value;
+            if(!raw) return;
             const json = JSON.parse(raw);
             const d = json.data || {};
-            const targetParams = ["str","con","pow","dex","app","siz","int","edu"];
             
-            if (d.params) {
-                d.params.forEach(p => {
-                    const label = p.label.replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).toLowerCase();
-                    if(targetParams.includes(label)) {
-                        const input = document.getElementById('in-' + label);
-                        if(input) { input.value = p.value; setBar(label, p.value); }
-                    }
-                });
-            }
-            if (d.status) {
-                d.status.forEach(s => {
-                    const label = s.label.replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).toLowerCase();
-                    const map = {'hp':'hp', 'mp':'mp', 'san':'san', '幸運':'luk', 'こううん':'luk'};
-                    const id = map[label] || map[s.label];
-                    if(id) { document.getElementById('in-' + id).value = s.value; update('d-' + id, s.value); }
-                });
+            // --- エディション自動判定ロジック ---
+            if (d.commands) {
+                if (d.commands.includes("CCB")) {
+                    setEdition(6); // CCBがあれば6版
+                } else if (d.commands.includes("CC")) {
+                    setEdition(7); // CCBがなくてCCがあれば7版
+                }
             }
 
+            // 1. 基本ステータス
+            const params = ["str","con","pow","dex","app","siz","int","edu"];
+            if (d.params) d.params.forEach(p => {
+                const l = p.label.toLowerCase(); 
+                if(params.includes(l)) { 
+                    document.getElementById('in-'+l).value = p.value; 
+                    setBar(l, p.value); 
+                }
+            });
+
+            // 2. 状態マップ
+            const statusMap = {'hp':'hp', 'mp':'mp', 'san':'san', '幸運':'luk', 'こううん':'luk', 'san値':'san'};
+            if (d.status) d.status.forEach(s => {
+                const id = statusMap[s.label.toLowerCase()] || statusMap[s.label];
+                if(id) { 
+                    document.getElementById('in-' + id).value = s.value; 
+                    updateVal('d-' + id, s.value, '0'); 
+                }
+            });
+
+            // 3. コマンドから抽出
             let extractedSkills = [];
-            if (d.skills) extractedSkills = d.skills.map(s => `${s.label} ${s.value}`);
             if (d.commands) {
                 const lines = d.commands.split('\n');
                 lines.forEach(line => {
-                    const match = line.match(/[a-zA-Z]*CCB?\(?.*\)?<?=(\d+)\s+【(.+?)】/);
+                    // CCB<=60 【幸運】 のような形式に対応
+                    const match = line.match(/CCB?\(?.*?\)?<=?(\d+)\s+【(.+?)】/);
                     if (match) {
-                        const sVal = match[1], sLabel = match[2].trim();
-                        const statusMap = {'幸運':'luk','SAN':'san','HP':'hp','MP':'mp','正気度':'san','正気度ロール':'san'};
-                        if(statusMap[sLabel]) {
-                            document.getElementById('in-' + statusMap[sLabel]).value = sVal;
-                            update('d-' + statusMap[sLabel], sVal);
-                        } else extractedSkills.push(`${sLabel} ${sVal}`);
+                        const val = match[1];
+                        const label = match[2].trim();
+                        const sId = statusMap[label.toLowerCase()] || statusMap[label];
+                        if (sId) {
+                            // ステータスなら専用欄へ
+                            document.getElementById('in-' + sId).value = val;
+                            updateVal('d-' + sId, val, '0');
+                        } else {
+                            // 技能ならリストへ
+                            extractedSkills.push(`${label} ${val}`);
+                        }
                     }
                 });
             }
+
+            // 4. 専用技能配列
+            if (d.skills) {
+                d.skills.forEach(s => {
+                    const label = s.label;
+                    if (!statusMap[label.toLowerCase()] && !statusMap[label]) {
+                        extractedSkills.push(`${label} ${s.value}`);
+                    }
+                });
+            }
+
             if (extractedSkills.length > 0) {
-                document.getElementById('in-skills').value = extractedSkills.join('\n');
+                document.getElementById('in-skills').value = [...new Set(extractedSkills)].join('\n');
                 refreshSkills();
             }
+
             if (d.name) splitNameRuby(d.name);
             if (d.color) { root.style.setProperty('--accent-color', d.color); document.getElementById('color-picker').value = d.color; }
             refreshProfileDisplay();
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Load Error:", e); }
     }
 
-    function setEdition(ed) {
-        root.style.setProperty('--stat-max', ed === 7 ? 100 : 25);
-        document.getElementById('btn-7th').classList.toggle('active', ed === 7);
-        document.getElementById('btn-6th').classList.toggle('active', ed === 6);
-        refreshScenarioDisplay();
-        ["str","con","pow","dex","app","siz","int","edu"].forEach(id => setBar(id, document.getElementById('in-' + id).value));
-    }
-    
-    function update(id, val, def) { const el = document.getElementById(id); if(el) el.innerText = val || def; }
-    
     function setBar(id, val) { 
         const max = parseInt(getComputedStyle(root).getPropertyValue('--stat-max'));
-        const bar = document.getElementById('b-' + id); if(bar) bar.style.width = Math.min(Math.max((val / max) * 100, 0), 100) + '%';
-        const label = document.getElementById('val-' + id); if(label) label.innerText = val;
+        const bar = document.getElementById('b-' + id);
+        if(bar) bar.style.width = Math.min((val / max) * 100, 100) + '%';
+        const num = document.getElementById('val-' + id);
+        if(num) num.innerText = val;
     }
 
     function refreshSkills() {
-        const text = document.getElementById('in-skills').value;
         const list = document.getElementById('skills-list'); list.innerHTML = "";
-        text.split('\n').forEach(line => {
+        const lines = document.getElementById('in-skills').value.split('\n');
+        lines.forEach(line => {
+            if(!line.trim()) return;
             const match = line.match(/(.+?)\s*[:\s=]\s*(\d+)/) || line.match(/(.+?)\s+(\d+)/);
             if (match) {
                 const item = document.createElement('div'); item.className = 'skill-item';
@@ -360,41 +355,38 @@
         });
     }
 
-    function setPos(p, v) { 
-        if(p.includes('scale')) root.style.setProperty(p, v);
-        else root.style.setProperty(p, v + 'px'); 
-    }
-
-    function loadImg(input, targetId) {
-        const file = input.files[0];
-        if (file) {
-            const target = document.getElementById(targetId);
-            target.src = URL.createObjectURL(file); target.style.display = 'block';
-        }
+    function setPos(p, v) { root.style.setProperty(p, p.includes('scale') ? v : v + 'px'); }
+    function loadImg(input, id) { 
+        const f = input.files[0]; 
+        if(f) { const el = document.getElementById(id); el.src = URL.createObjectURL(f); el.style.display = 'block'; }
     }
 
     function applyTheme(type) {
         const isDark = type === 'dark';
+        root.style.setProperty('--bg-rgb', isDark ? '5, 5, 5' : '255, 255, 255');
         root.style.setProperty('--bg-color', isDark ? '#050505' : '#ffffff');
         root.style.setProperty('--text-color', isDark ? '#ffffff' : '#111111');
         root.style.setProperty('--sub-text-color', isDark ? '#888888' : '#666666');
         root.style.setProperty('--border-color', isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)');
-        
-        if (isDark) {
-            root.style.setProperty('--img-shadow', 'drop-shadow(0 10px 30px rgba(0,0,0,0.7))');
-        } else {
-            root.style.setProperty('--img-shadow', 'drop-shadow(0 5px 15px rgba(0,0,0,0.08))');
-        }
+        root.style.setProperty('--img-shadow', isDark ? 'drop-shadow(0 10px 30px rgba(0,0,0,0.7))' : 'drop-shadow(0 5px 15px rgba(0,0,0,0.08))');
     }
 
     function saveImage() {
-        const target = document.getElementById('display-canvas');
-        html2canvas(target, { scale: 2, useCORS: true }).then(canvas => {
-            const link = document.createElement('a'); link.download = `character_sheet.png`;
-            link.href = canvas.toDataURL(); link.click();
+        html2canvas(document.getElementById('display-canvas'), { scale: 2, useCORS: true }).then(c => {
+            const a = document.createElement('a'); a.download = `character_sheet.png`; a.href = c.toDataURL(); a.click();
         });
     }
 
+    function setEdition(ed) {
+        root.style.setProperty('--stat-max', ed === 7 ? 100 : 25);
+        document.getElementById('btn-7th').classList.toggle('active', ed === 7);
+        document.getElementById('btn-6th').classList.toggle('active', ed === 6);
+        refreshScenarioDisplay();
+        ["str","con","pow","dex","app","siz","int","edu"].forEach(id => {
+            const inputVal = document.getElementById('in-' + id).value;
+            if(inputVal) setBar(id, inputVal);
+        });
+    }
     setEdition(7);
 </script>
 </body>

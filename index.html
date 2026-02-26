@@ -72,7 +72,6 @@
         .file-input-area:hover, .file-input-area.dragover { border-color: var(--accent); background: rgba(197, 55, 60, 0.05); }
         .file-label { color: var(--accent); text-decoration: underline; font-weight: bold; }
 
-        /* ログ設定セクション */
         #logSettingsSection { background: #313338; padding: 25px; border-radius: 8px; margin-top: 30px; display: none; }
         .setting-group { margin-bottom: 20px; }
         .setting-label { font-size: 0.75rem; font-weight: bold; color: var(--accent); font-family: 'Montserrat'; letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
@@ -178,24 +177,31 @@
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
     }
 
-    // 名前から安全なクラス名（セレクタ用）を生成
     function getSafeKey(name) {
         return 'char-' + btoa(encodeURIComponent(name)).replace(/=/g, '').replace(/\+/g, '').replace(/\//g, '');
+    }
+
+    // リセット関数
+    function resetEditor() {
+        logData = [];
+        charSettings = {};
+        document.getElementById('logEditor').innerHTML = '';
+        document.getElementById('charGrid').innerHTML = '';
+        document.getElementById('logTitleInput').value = '';
     }
 
     async function processLog(file) {
         if (!file) return;
         
-        // ファイル名からタイトルを設定（拡張子を除く）
+        // 新しいファイルを読み込む前にリセット
+        resetEditor();
+        
         document.getElementById('logTitleInput').value = file.name.replace(/\.[^/.]+$/, "");
 
         const text = await file.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, 'text/html');
         const lines = doc.querySelectorAll('p');
-        
-        logData = [];
-        charSettings = {};
 
         lines.forEach((p, index) => {
             const temp = document.createElement('div');
@@ -313,9 +319,34 @@
     }
 
     function exportLog() {
-        const title = document.getElementById('logTitleInput').value || 'Exported_Log';
-        // ここで logData と charSettings を使って HTML を構築
-        alert(title + '.html として保存する処理を続行します。');
+        const logTitle = document.getElementById('logTitleInput').value || 'Exported_Log';
+        
+        let outputHtml = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${logTitle}</title><style>
+            body { background: #1a1a1a; color: #dbdee1; font-family: sans-serif; padding: 40px 20px; line-height: 1.6; max-width: 800px; margin: 0 auto; }
+            h1 { border-bottom: 2px solid #C5373C; padding-bottom: 10px; font-size: 1.5rem; }
+            .log-line { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+            .name { font-weight: bold; margin-right: 10px; }
+            .tab { font-size: 0.7rem; color: #666; margin-right: 10px; }
+            .content { white-space: pre-wrap; }
+        </style></head><body><h1>${logTitle}</h1>`;
+
+        logData.forEach(item => {
+            const settings = charSettings[item.originalName];
+            outputHtml += `
+            <div class="log-line">
+                <span class="tab">[${item.tab}]</span>
+                <span class="name" style="color:${settings.color}">${settings.displayName}</span>
+                <div class="content">${item.content}</div>
+            </div>`;
+        });
+
+        outputHtml += `</body></html>`;
+
+        const blob = new Blob([outputHtml], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = logTitle + ".html";
+        a.click();
     }
 </script>
 </body>
